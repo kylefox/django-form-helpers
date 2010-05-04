@@ -5,7 +5,7 @@ from django.template.loader import render_to_string
 register = template.Library()
 
 @register.filter
-def render_field(field):
+def render_field(field, template=None):
     """
     Renders the specified Form field.
     
@@ -30,13 +30,13 @@ def render_field(field):
         
     which renders the template specified.
     
-    Finally, it's possible to specify default templates for specific widget types in settings.py:
-    
-    FORM_FIELD_TEMPLATES = {
-        Textarea: "form_helpers/textbox.html",
-        DateTimeWidget: "form_helpers/datepicker.html"
-    }
-    
+    # Finally, it's possible to specify default templates for specific widget types in settings.py:
+    # 
+    # FORM_FIELD_TEMPLATES = {
+    #     Textarea: "form_helpers/textbox.html",
+    #     DateTimeWidget: "form_helpers/datepicker.html"
+    # }
+    # 
     """
     classes = ['field', field.field.__class__.__name__]
     if field.errors:
@@ -53,6 +53,11 @@ def render_field(field):
         'forms/%s.html' % field.field.__class__.__name__,
         'forms/field.html',
     ]
+    if template:
+        if '.' in template:
+            field_templates.insert(0, template)
+        else:
+            field_templates.insert(0, 'forms/%s_field.html' % template)
     data = {
         'classes': " ".join(classes),
         'label': field.label_tag(),
